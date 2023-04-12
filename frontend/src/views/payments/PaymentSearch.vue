@@ -864,8 +864,8 @@ export default {
     dynamicSearchQuery() {
       return (offset) =>
         typeof this.dynamicData == 'object'
-          ? `http://172.20.10.183:7000/payment/?status=processing${this.selectedModel}&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&offset=${offset}`
-          : `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}${this.selectedStatus}&account=${this.searchForm.accountPhoneNumber}&format=json&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}:00Z%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}:00Z&point_id=${this.searchForm.terminalId}&service_name=${this.searchForm.selectedService}&provider_name=${this.searchForm.selectedProvider}&offset=${offset}`
+          ? `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}&status=processing&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&point_id=${this.searchForm.terminalId}&offset=${offset}`
+          : `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}${this.selectedStatus}&format=json&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}&service_name=${this.searchForm.selectedService}&provider_name=${this.searchForm.selectedProvider}&point_id=${this.searchForm.terminalId}&offset=${offset}`
     },
     //computed dynamic property for sorted search results
     sortedSearchResults() {
@@ -965,6 +965,7 @@ export default {
     //payment id 388291856 account num 558557596    GPG10020899
     searchArticle: function (query) {
       this.pageLoading = true
+      this.page = 1
       if (
         !this.itemsPerPage ||
         this.itemsPerPage == 0 ||
@@ -990,9 +991,8 @@ export default {
     },
     pageSelected: function (pageId) {
       var offset = (pageId - 1) * this.itemsPerPage
-      
-      this.page = pageId
       this.searchArticle(this.dynamicSearchQuery(offset))
+      this.page = pageId
     },
     // void , call to get full data of specified element
     showFullInfo: function (id) {
@@ -1077,9 +1077,7 @@ export default {
   },
   mounted() {
     if (typeof this.dynamicData == 'object') {
-      this.searchArticle(
-        `http://172.20.10.183:7000/payment/?status=processing${this.selectedModel}&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&limit=25`,
-      )
+      this.searchArticle(this.dynamicSearchQuery(0))
     }
   },
   beforeMount() {

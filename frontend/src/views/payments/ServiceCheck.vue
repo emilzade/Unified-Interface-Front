@@ -444,6 +444,7 @@ export default {
     },
     searchArticle: function (query) {
       this.pageLoading = true
+      this.page = 1
       console.log(query)
       fetch(query, {
         method: 'Get',
@@ -490,8 +491,8 @@ export default {
     },
     pageSelected: function (pageId) {
       var offset = (pageId - 1) * this.itemsPerPage
-      this.page = pageId
       this.searchArticle(this.dynamicSearchQuery(offset))
+      this.page = pageId
     },
     //datetime returns previous day
     getPreviousDay: function (date = new Date()) {
