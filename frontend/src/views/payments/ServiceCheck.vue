@@ -29,22 +29,6 @@
       </CCol>
       <CCol class="col-12 col-md-4 col-sm-6 my-2">
         <VueMultiselect
-          v-model="selectedService"
-          :options="services"
-          :limit="1"
-          :multiple="false"
-          :close-on-select="false"
-          :clear-on-select="false"
-          :preserve-search="true"
-          :placeholder="'Select Service'"
-          label="servicename"
-          track-by="servicename"
-          @select="selectService"
-          @remove="searchForm.selectedService = ''"
-        />
-      </CCol>
-      <CCol class="col-12 col-md-4 col-sm-6 my-2">
-        <VueMultiselect
           v-model="selectedProvider"
           :options="providers"
           :limit="1"
@@ -56,7 +40,23 @@
           track-by="providername"
           :placeholder="'Select Providers'"
           @select="selectProvider"
-          @remove="searchForm.selectedProvider = ''"
+          @remove="searchForm.provider_id = ''"
+        />
+      </CCol>
+      <CCol class="col-12 col-md-4 col-sm-6 my-2">
+        <VueMultiselect
+          v-model="selectedService"
+          :options="services"
+          :limit="1"
+          :multiple="false"
+          :close-on-select="false"
+          :clear-on-select="false"
+          :preserve-search="true"
+          :placeholder="'Select Service'"
+          label="servicename"
+          track-by="servicename"
+          @select="selectService"
+          @remove="searchForm.serviceid = ''"
         />
       </CCol>
       <CCol
@@ -208,11 +208,6 @@
           </span>
         </CTableDataCell>
         <CTableDataCell>
-          <span style="width: 100px; display: block; overflow: hidden">
-            {{ item.locationname }}
-          </span>
-        </CTableDataCell>
-        <CTableDataCell>
           <span
             :class="{
               'bg-purple': item.type == 'Mpay',
@@ -288,8 +283,8 @@ export default {
   data() {
     const searchForm = ref({
       terminalType: 'Both',
-      selectedService: '',
-      selectedProvider: '',
+      serviceid: '',
+      provider_id: '',
       successType: 'All',
       dateStart: this.getPreviousDay(
         new Date(new Date().toISOString().slice(0, 10)),
@@ -353,9 +348,8 @@ export default {
       { id: 3, title: 'Provider', sortBy: 'providername' },
       { id: 4, title: 'Status', sortBy: 'status_value' },
       { id: 5, title: 'Payment Count', sortBy: 'payment_count' },
-      { id: 6, title: 'Location', sortBy: 'locationname' },
-      { id: 7, title: 'Terminal', sortBy: 'type' },
-      { id: 8, title: 'Operations', sortBy: 'operations' },
+      { id: 6, title: 'Terminal', sortBy: 'type' },
+      { id: 7, title: 'Operations', sortBy: 'operations' },
     ]
 
     const dbServices = []
@@ -391,7 +385,7 @@ export default {
   computed: {
     dynamicSearchQuery() {
       return (offset) =>
-        `http://172.20.10.183:7000/service-check/?service_name=${this.searchForm.selectedService}&provider_name=${this.searchForm.selectedProvider}&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}${this.selectedModel}${this.selectedStatus}&offset=${offset}`
+        `http://172.20.10.183:7000/service-check/?service_id=${this.searchForm.serviceid}&provider_id=${this.searchForm.provider_id}&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}${this.selectedModel}${this.selectedStatus}&offset=${offset}`
     },
     sortedSearchResults() {
       /*eslint-disable*/
@@ -424,11 +418,29 @@ export default {
       }
     },
     services() {
-      return this.searchForm.terminalType == 'Mpay'
-        ? this.dbServices.filter((x) => x.type == 'Mpay_Service')
-        : this.searchForm.terminalType == 'Modenis'
-        ? this.dbServices.filter((x) => x.type == 'Modenis_Service')
-        : this.dbServices
+      if (this.selectedProvider == null) {
+        return this.searchForm.terminalType == 'Mpay'
+          ? this.dbServices.filter((x) => x.type == 'Mpay_Service')
+          : this.searchForm.terminalType == 'Modenis'
+          ? this.dbServices.filter((x) => x.type == 'Modenis_Service')
+          : this.dbServices
+      } else {
+        return this.searchForm.terminalType == 'Mpay'
+          ? this.dbServices.filter(
+              (x) =>
+                x.type == 'Mpay_Service' &&
+                x.provider_id == this.selectedProvider.provider_id,
+            )
+          : this.searchForm.terminalType == 'Modenis'
+          ? this.dbServices.filter(
+              (x) =>
+                x.type == 'Modenis_Service' &&
+                x.provider_id == this.selectedProvider.provider_id,
+            )
+          : this.dbServices.filter(
+              (x) => x.provider_id == this.selectedProvider.provider_id,
+            )
+      }
     },
     providers() {
       return this.searchForm.terminalType == 'Mpay'
@@ -469,6 +481,7 @@ export default {
         timeStart: this.searchForm.timeStart,
         timeEnd: this.searchForm.timeEnd,
       }
+      //console.log(item)
       this.$store.commit('setPaymentSearchObject', item)
       this.$router.push({
         name: 'PaymentSearch',
@@ -482,12 +495,12 @@ export default {
       this.currentSort = sortDir
     },
     selectService: function (service) {
-      this.searchForm.selectedService = service.servicename
-      console.log(service)
+      this.searchForm.serviceid = service.serviceid
+      console.log(this.searchForm.serviceid)
     },
     selectProvider: function (provider) {
-      this.searchForm.selectedProvider = provider.providername
-      console.log(this.searchForm.selectedProvider)
+      this.searchForm.provider_id = provider.provider_id
+      console.log(provider)
     },
     pageSelected: function (pageId) {
       var offset = (pageId - 1) * this.itemsPerPage
@@ -503,15 +516,15 @@ export default {
     },
     bgColorCheck: function (status) {
       switch (status) {
-        case 'Error':
+        case 'error':
           return 'bg-danger'
-        case 'Success':
+        case 'success':
           return 'bg-success'
-        case 'Rejected':
+        case 'rejected':
           return 'bg-danger'
-        case 'Processing':
+        case 'processing':
           return 'bg-secondary'
-        case 'Reject':
+        case 'reject':
           return 'bg-danger'
       }
     },
@@ -521,13 +534,13 @@ export default {
       .then((response) => response.json())
       .then((data) => {
         this.dbServices = data
-        //console.log(this.dbServices)
+        console.log(this.dbServices)
       })
     fetch('http://172.20.10.183:7000/provider')
       .then((response) => response.json())
       .then((data) => {
         this.dbProviders = data
-        //console.log(this.dbProviders)
+        console.log(this.dbProviders)
       })
   },
 }

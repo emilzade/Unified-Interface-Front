@@ -61,6 +61,7 @@
                 name="terminalType"
                 :value="terminal.name"
                 :checked="terminal.default"
+                :disabled="this.dynamicData != ''"
               />
             </div>
           </CCol>
@@ -114,16 +115,34 @@
         <CCol class="col-12 col-sm-4 my-2">
           <VueMultiselect
             v-model="selectedAgent"
-            :options="agents"
+            :options="dbAgents"
             :limit="1"
             :multiple="false"
             :close-on-select="false"
             :clear-on-select="false"
             :preserve-search="true"
-            label="name"
             :placeholder="'Select Agent'"
-            track-by="name"
-            @select="addAgentId"
+            :disabled="this.dynamicData != ''"
+            label="agentname"
+            track-by="agentname"
+            @select="selectAgent"
+          />
+        </CCol>
+        <CCol class="col-12 col-sm-4 my-2">
+          <VueMultiselect
+            v-model="selectedProvider"
+            :options="providers"
+            :limit="1"
+            :multiple="false"
+            :close-on-select="true"
+            :clear-on-select="false"
+            :preserve-search="true"
+            :placeholder="'Select Providers'"
+            :disabled="this.dynamicData != ''"
+            label="providername"
+            track-by="providername"
+            @select="selectProvider"
+            @remove="searchForm.selectedProvider = ''"
           />
         </CCol>
         <CCol class="col-12 col-sm-4 my-2">
@@ -136,26 +155,11 @@
             :clear-on-select="false"
             :preserve-search="true"
             :placeholder="'Select Service'"
+            :disabled="this.dynamicData != ''"
             label="servicename"
             track-by="servicename"
             @select="selectService"
             @remove="searchForm.selectedService = ''"
-          />
-        </CCol>
-        <CCol class="col-12 col-sm-4 my-2">
-          <VueMultiselect
-            v-model="selectedProvider"
-            :options="providers"
-            :limit="1"
-            :multiple="false"
-            :close-on-select="true"
-            :clear-on-select="false"
-            :preserve-search="true"
-            label="providername"
-            track-by="providername"
-            :placeholder="'Select Providers'"
-            @select="selectProvider"
-            @remove="searchForm.selectedProvider = ''"
           />
         </CCol>
         <CCol class="col-12 col-sm-4 my-2">
@@ -204,6 +208,7 @@
             type="date"
             placeholder="StartDate"
             class="w-100 h-100"
+            :disabled="this.dynamicData != ''"
           />
         </CCol>
         <CCol class="col-sm-2 col-6 my-2">
@@ -213,6 +218,7 @@
             type="time"
             placeholder="StartDate"
             class="w-100 h-100"
+            :disabled="this.dynamicData != ''"
           />
         </CCol>
         <CCol class="col-sm-2 col-6 my-2">
@@ -222,6 +228,7 @@
             type="date"
             placeholder="EndDate"
             class="w-100 h-100"
+            :disabled="this.dynamicData != ''"
           />
         </CCol>
         <CCol class="col-sm-2 col-6 my-2">
@@ -231,6 +238,7 @@
             type="time"
             placeholder="EndDate"
             class="w-100 h-100"
+            :disabled="this.dynamicData != ''"
           />
         </CCol>
         <!--date inputs end-->
@@ -297,6 +305,7 @@
                 :name="'successType' + successType.id"
                 :value="successType.name"
                 :checked="successType.default"
+                :disabled="this.dynamicData != ''"
               />
             </div>
           </div>
@@ -330,6 +339,85 @@
       <!--advanced search end-->
     </CRow>
   </CForm>
+
+  <CCallout v-if="typeof dynamicData == 'object'" color="primary">
+    <CTable>
+      <CTableHead>
+        <CTableRow>
+          <CTableHeaderCell scope="col">#</CTableHeaderCell>
+          <CTableHeaderCell scope="col">Type</CTableHeaderCell>
+          <CTableHeaderCell scope="col">Agent</CTableHeaderCell>
+          <CTableHeaderCell scope="col">Provider Name</CTableHeaderCell>
+          <CTableHeaderCell scope="col">Service Name</CTableHeaderCell>
+          <CTableHeaderCell scope="col">Status </CTableHeaderCell>
+          <CTableHeaderCell scope="col">Count </CTableHeaderCell>
+          <CTableHeaderCell scope="col">Date </CTableHeaderCell>
+          <CTableHeaderCell scope="col">Time </CTableHeaderCell>
+        </CTableRow>
+      </CTableHead>
+      <CTableBody>
+        <CTableRow>
+          <CTableHeaderCell scope="row">1</CTableHeaderCell>
+          <CTableDataCell>{{ dynamicData.type }}</CTableDataCell>
+          <CTableDataCell>{{ dynamicData.agentname }}</CTableDataCell>
+          <CTableDataCell>{{ dynamicData.providername }}</CTableDataCell>
+          <CTableDataCell>{{ dynamicData.servicename }}</CTableDataCell>
+          <CTableDataCell>{{ dynamicData.status_value }}</CTableDataCell>
+          <CTableDataCell>{{ dynamicData.payment_count }}</CTableDataCell>
+          <CTableDataCell
+            >{{ dynamicData.dateStart }} -
+            {{ dynamicData.dateEnd }}</CTableDataCell
+          >
+          <CTableDataCell
+            >{{ dynamicData.timeStart }} -
+            {{ dynamicData.timeEnd }}</CTableDataCell
+          >
+        </CTableRow>
+      </CTableBody>
+    </CTable>
+    <!-- <div>
+      <p>Searching for these parameters</p>
+      <div>
+        <span class="text-secondary px-1">Type:</span>
+        <span class="text-dark px-1">{{ dynamicData.type }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">Agent:</span>
+        <span class="text-dark px-1"> {{ dynamicData.agentname }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">ProviderName:</span>
+        <span class="text-dark px-1">{{ dynamicData.providername }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">Service Name:</span>
+        <span class="text-dark px-1">{{ dynamicData.servicename }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">Status:</span>
+        <span class="text-dark px-1">{{ dynamicData.status_value }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">Count:</span>
+        <span class="text-dark px-1">{{ dynamicData.payment_count }}</span>
+      </div>
+      <div>
+        <span class="text-secondary px-1">Date:</span>
+        <span class="text-dark px-1"
+          >{{ dynamicData.dateStart }} - {{ dynamicData.dateEnd }}</span
+        >
+      </div>
+      <div>
+        <span class="text-secondary px-1">Time:</span>
+        <span class="text-dark px-1"
+          >{{ dynamicData.timeStart }} - {{ dynamicData.timeEnd }}</span
+        >
+      </div>
+    </div> -->
+
+    <div @click="resetDynamicDataSearch" class="btn btn-primary m-2">Reset</div>
+  </CCallout>
+
   <!--data table start-->
   <CTable striped hover small responsive class="mt-5">
     <CTableHead>
@@ -659,26 +747,9 @@ export default {
         name: 'gef',
       },
     ]
-    const agents = [
-      {
-        id: 1,
-        name: 'Agent1',
-      },
-      {
-        id: 2,
-        name: 'Agent2',
-      },
-      {
-        id: 3,
-        name: 'Agent3',
-      },
-      {
-        id: 4,
-        name: 'Agent4',
-      },
-    ]
     const dbServices = []
     const dbProviders = []
+    const dbAgents = []
     const retailNetworks = [
       {
         id: 1,
@@ -772,6 +843,7 @@ export default {
       { id: 9, title: 'Terminal', sortBy: 'type' },
       { id: 10, title: 'Operations', sortBy: 'operations' },
     ]
+
     const dbData = { results: [] }
     const detailedPayment = {}
     const operations = [
@@ -820,7 +892,6 @@ export default {
       icons,
       //initial objects
       regions,
-      agents,
       operations,
       successTypes,
       retailNetworks,
@@ -852,6 +923,7 @@ export default {
       dbData,
       dbServices,
       dbProviders,
+      dbAgents,
       detailedPayment,
       fetchedFullData,
       fetchedCommentData,
@@ -864,7 +936,7 @@ export default {
     dynamicSearchQuery() {
       return (offset) =>
         typeof this.dynamicData == 'object'
-          ? `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}&status=processing&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&point_id=${this.searchForm.terminalId}&offset=${offset}`
+          ? `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}&status=${this.dynamicData.status_value}&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&point_id=${this.searchForm.terminalId}&offset=${offset}`
           : `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}${this.selectedStatus}&format=json&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}&service_name=${this.searchForm.selectedService}&provider_name=${this.searchForm.selectedProvider}&point_id=${this.searchForm.terminalId}&offset=${offset}`
     },
     //computed dynamic property for sorted search results
@@ -899,11 +971,29 @@ export default {
       }
     },
     services() {
-      return this.searchForm.terminalType == 'Mpay'
-        ? this.dbServices.filter((x) => x.type == 'Mpay_Service')
-        : this.searchForm.terminalType == 'Modenis'
-        ? this.dbServices.filter((x) => x.type == 'Modenis_Service')
-        : this.dbServices
+      if (this.selectedProvider == null) {
+        return this.searchForm.terminalType == 'Mpay'
+          ? this.dbServices.filter((x) => x.type == 'Mpay_Service')
+          : this.searchForm.terminalType == 'Modenis'
+          ? this.dbServices.filter((x) => x.type == 'Modenis_Service')
+          : this.dbServices
+      } else {
+        return this.searchForm.terminalType == 'Mpay'
+          ? this.dbServices.filter(
+              (x) =>
+                x.type == 'Mpay_Service' &&
+                x.provider_id == this.selectedProvider.provider_id,
+            )
+          : this.searchForm.terminalType == 'Modenis'
+          ? this.dbServices.filter(
+              (x) =>
+                x.type == 'Modenis_Service' &&
+                x.provider_id == this.selectedProvider.provider_id,
+            )
+          : this.dbServices.filter(
+              (x) => x.provider_id == this.selectedProvider.provider_id,
+            )
+      }
     },
     providers() {
       return this.searchForm.terminalType == 'Mpay'
@@ -916,6 +1006,12 @@ export default {
       selectedTableData.length === 0,
   },
   methods: {
+    resetDynamicDataSearch: function () {
+      this.$store.state.paymentSearchObject = ''
+      this.dbData = { results: [] }
+      this.page = 1
+      this.totalElementCount = 0
+    },
     //datetime returns previous day
     getPreviousDay: function (date = new Date()) {
       const previous = new Date(date.getTime())
@@ -934,14 +1030,15 @@ export default {
     // void , adds service id to selected service
     selectService: function (service) {
       this.searchForm.selectedService = service.servicename
-      console.log(this.searchForm.selectedService)
+      console.log(service)
     },
     selectProvider: function (provider) {
-      this.searchForm.selectedProvider = provider.providername
+      this.searchForm.selectedProvider = provider
       console.log(this.searchForm.selectedProvider)
     },
-    addAgentId: function (agent) {
-      this.searchForm.agentId = agent.id
+    selectAgent: function (agent) {
+      this.searchForm.agentId = agent.agent_id
+      console.log(this.searchForm.agentId)
     },
     // void , adds retail network id to selected retail network
     addRetailNetworkId: function (retailNetwork) {
@@ -1062,15 +1159,15 @@ export default {
     //checks status and return color for spesific status type
     bgColorCheck: function (status) {
       switch (status) {
-        case 'Error':
+        case 'error':
           return 'bg-danger'
-        case 'Success':
+        case 'success':
           return 'bg-success'
-        case 'Rejected':
+        case 'rejected':
           return 'bg-danger'
-        case 'Processing':
+        case 'processing':
           return 'bg-secondary'
-        case 'Reject':
+        case 'reject':
           return 'bg-danger'
       }
     },
@@ -1079,15 +1176,27 @@ export default {
     if (typeof this.dynamicData == 'object') {
       this.searchArticle(this.dynamicSearchQuery(0))
     }
+    console.log(this.dynamicData)
   },
   beforeMount() {
     fetch('http://172.20.10.183:7000/service')
       .then((response) => response.json())
-      .then((data) => (this.dbServices = data))
-
+      .then((data) => {
+        this.dbServices = data
+        //console.log(this.dbServices)
+      })
     fetch('http://172.20.10.183:7000/provider')
       .then((response) => response.json())
-      .then((data) => (this.dbProviders = data))
+      .then((data) => {
+        this.dbProviders = data
+        //console.log(this.dbProviders)
+      })
+    fetch('http://172.20.10.183:7000/agent')
+      .then((response) => response.json())
+      .then((data) => {
+        this.dbAgents = data
+        //console.log(this.dbAgents)
+      })
   },
 }
 </script>
