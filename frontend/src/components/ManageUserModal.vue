@@ -148,17 +148,17 @@ export default {
     },
   },
   mounted() {
-    console.log(this.data)
+    //console.log(this.data)
 
     if (this.data == null) {
       this.modalPurpose = 'create'
-      console.log('create')
+      //console.log('create')
     } else {
       for (let i = 0; i < this.data.roles.length; i++) {
         this.selectedRoles.push(this.data.roles[i])
       }
       this.modalPurpose = 'update'
-      console.log('update')
+      //console.log('update')
     }
   },
 }

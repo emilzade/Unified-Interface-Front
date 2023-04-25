@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import VueCookies from 'vue3-cookies'
 
 import CoreuiVue from '@coreui/vue'
 import CIcon from '@coreui/icons-vue'
@@ -11,7 +10,6 @@ import DocsCallout from '@/components/DocsCallout'
 import DocsExample from '@/components/DocsExample'
 
 const app = createApp(App)
-app.use(VueCookies)
 app.use(store)
 app.use(router)
 app.use(CoreuiVue)

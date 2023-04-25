@@ -398,7 +398,7 @@ export default {
       this.currentSort = sortDir
     },
     searchArticle: function () {
-      console.log(this.searchForm)
+      //console.log(this.searchForm)
       this.searchArticles(this.searchForm)
     },
     // list , call to get database data
@@ -416,7 +416,7 @@ export default {
     },
     selectOperation: function (operation) {
       this.selectedOperation = operation
-      console.log(operation)
+      //console.log(operation)
     },
   },
 }

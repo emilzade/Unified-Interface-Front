@@ -24,6 +24,7 @@
             name="terminalType"
             :value="terminal.name"
             :checked="terminal.default"
+            @click="selectTerminalType"
           />
         </div>
       </CCol>
@@ -63,21 +64,21 @@
         class="d-flex col-md-4 col-12 border rounded my-2 justify-content-between align-items-center"
       >
         <div
-          class="d-flex flex-column align-items-center w-100"
-          v-for="sType in successTypes"
-          v-bind:key="sType.id"
+          class="d-flex flex-column align-items-center my-1 w-100"
+          v-for="successType in successTypes"
+          v-bind:key="successType.id"
         >
-          <label class="w-100 text-center" role="button" :for="sType.name"
-            ><small>{{ sType.name }}</small></label
+          <label :for="'successType' + successType.id" role="button"
+            ><small>{{ successType.name }}</small></label
           >
           <input
             class="form-check-input"
-            type="radio"
-            :id="sType.name"
-            v-model="searchForm.successType"
-            name="successType"
-            :value="sType.name"
-            :checked="sType.default"
+            type="checkbox"
+            :id="'successType' + successType.id"
+            v-model="searchForm.successTypeList"
+            :name="'successType' + successType.id"
+            :value="successType.name"
+            :checked="successType.default"
           />
         </div>
       </CCol>
@@ -285,7 +286,7 @@ export default {
       terminalType: 'Both',
       serviceid: '',
       provider_id: '',
-      successType: 'All',
+      successTypeList: [],
       dateStart: this.getPreviousDay(
         new Date(new Date().toISOString().slice(0, 10)),
       )
@@ -316,12 +317,12 @@ export default {
       },
     ]
     const successTypes = [
-      {
-        id: 1,
-        name: 'All',
-        type: 'radio',
-        default: true,
-      },
+      // {
+      //   id: 1,
+      //   name: 'All',
+      //   type: 'radio',
+      //   default: true,
+      // },
       {
         id: 2,
         name: 'success',
@@ -407,16 +408,27 @@ export default {
       }
     },
     selectedStatus() {
-      if (this.searchForm.successType == 'All') {
+      if (this.searchForm.successTypeList.length == 0) {
         return ''
-      } else if (this.searchForm.successType == 'success') {
-        return '&status=success'
-      } else if (this.searchForm.successType == 'reject') {
-        return '&status=reject'
-      } else if (this.searchForm.successType == 'processing') {
-        return '&status=processing'
+      } else {
+        var tempString = ''
+        for (var i = 0; i < this.searchForm.successTypeList.length; i++) {
+          tempString += '&status=' + this.searchForm.successTypeList[i]
+        }
+        return tempString
       }
     },
+    // selectedStatus() {
+    //   if (this.searchForm.successType == 'All') {
+    //     return ''
+    //   } else if (this.searchForm.successType == 'success') {
+    //     return '&status=success'
+    //   } else if (this.searchForm.successType == 'reject') {
+    //     return '&status=reject'
+    //   } else if (this.searchForm.successType == 'processing') {
+    //     return '&status=processing'
+    //   }
+    // },
     services() {
       if (this.selectedProvider == null) {
         return this.searchForm.terminalType == 'Mpay'
@@ -457,7 +469,7 @@ export default {
     searchArticle: function (query) {
       this.pageLoading = true
       this.page = 1
-      console.log(query)
+      //console.log(query)
       fetch(query, {
         method: 'Get',
         headers: {
@@ -467,7 +479,7 @@ export default {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
+          //console.log(data)
           this.dbData = data
           this.totalElementCount = data.overall_total
           this.pageLoading = false
@@ -496,11 +508,16 @@ export default {
     },
     selectService: function (service) {
       this.searchForm.serviceid = service.serviceid
-      console.log(this.searchForm.serviceid)
+      //console.log(this.searchForm.serviceid)
     },
     selectProvider: function (provider) {
       this.searchForm.provider_id = provider.provider_id
-      console.log(provider)
+      this.selectedService = ref()
+      //console.log(provider)
+    },
+    selectTerminalType: function () {
+      this.selectedProvider = ref()
+      this.selectedService = ref()
     },
     pageSelected: function (pageId) {
       var offset = (pageId - 1) * this.itemsPerPage
@@ -534,13 +551,13 @@ export default {
       .then((response) => response.json())
       .then((data) => {
         this.dbServices = data
-        console.log(this.dbServices)
+        //console.log(this.dbServices)
       })
     fetch('http://172.20.10.183:7000/provider')
       .then((response) => response.json())
       .then((data) => {
         this.dbProviders = data
-        console.log(this.dbProviders)
+        //console.log(this.dbProviders)
       })
   },
 }

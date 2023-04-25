@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import authModule from '../store/modules/auth'
 
 export default createStore({
   state: {
@@ -18,9 +19,9 @@ export default createStore({
     },
     setPaymentSearchObject(state, data) {
       state.paymentSearchObject = data
-      console.log(state, data)
+      //console.log(state, data)
     },
   },
   actions: {},
-  modules: {},
+  modules: { auth: authModule },
 })

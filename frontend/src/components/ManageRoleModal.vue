@@ -151,11 +151,11 @@ export default {
     },
   },
   mounted() {
-    console.log(this.data)
+    //console.log(this.data)
 
     if (this.data == null) {
       this.modalPurpose = 'create'
-      console.log('create')
+      //console.log('create')
     } else {
       for (let i = 0; i < this.data.readAccess.length; i++) {
         this.selectedReadAccess.push(this.data.readAccess[i])
@@ -164,7 +164,7 @@ export default {
         this.selectedWriteAccess.push(this.data.writeAccess[i])
       }
       this.modalPurpose = 'update'
-      console.log('update')
+      //console.log('update')
     }
   },
 }

@@ -340,6 +340,7 @@
     </CRow>
   </CForm>
 
+  <!--dynamic data start-->
   <CCallout v-if="typeof dynamicData == 'object'" color="primary">
     <CTable>
       <CTableHead>
@@ -351,13 +352,13 @@
           <CTableHeaderCell scope="col">Service Name</CTableHeaderCell>
           <CTableHeaderCell scope="col">Status </CTableHeaderCell>
           <CTableHeaderCell scope="col">Count </CTableHeaderCell>
-          <CTableHeaderCell scope="col">Date </CTableHeaderCell>
-          <CTableHeaderCell scope="col">Time </CTableHeaderCell>
+          <CTableHeaderCell scope="col">Date Start </CTableHeaderCell>
+          <CTableHeaderCell scope="col">Date End </CTableHeaderCell>
         </CTableRow>
       </CTableHead>
       <CTableBody>
         <CTableRow>
-          <CTableHeaderCell scope="row">1</CTableHeaderCell>
+          <CTableHeaderCell scope="row">*</CTableHeaderCell>
           <CTableDataCell>{{ dynamicData.type }}</CTableDataCell>
           <CTableDataCell>{{ dynamicData.agentname }}</CTableDataCell>
           <CTableDataCell>{{ dynamicData.providername }}</CTableDataCell>
@@ -365,13 +366,11 @@
           <CTableDataCell>{{ dynamicData.status_value }}</CTableDataCell>
           <CTableDataCell>{{ dynamicData.payment_count }}</CTableDataCell>
           <CTableDataCell
-            >{{ dynamicData.dateStart }} -
-            {{ dynamicData.dateEnd }}</CTableDataCell
-          >
+            >{{ dynamicData.dateStart }} - {{ dynamicData.timeStart }}
+          </CTableDataCell>
           <CTableDataCell
-            >{{ dynamicData.timeStart }} -
-            {{ dynamicData.timeEnd }}</CTableDataCell
-          >
+            >{{ dynamicData.dateEnd }} - {{ dynamicData.timeStart }}
+          </CTableDataCell>
         </CTableRow>
       </CTableBody>
     </CTable>
@@ -417,6 +416,7 @@
 
     <div @click="resetDynamicDataSearch" class="btn btn-primary m-2">Reset</div>
   </CCallout>
+  <!--dynamic data end-->
 
   <!--data table start-->
   <CTable striped hover small responsive class="mt-5">
@@ -765,11 +765,11 @@ export default {
       },
     ]
     const successTypes = [
-      {
-        id: 1,
-        name: 'All',
-        default: true,
-      },
+      // {
+      //   id: 1,
+      //   name: 'All',
+      //   default: true,
+      // },
       {
         id: 2,
         name: 'success',
@@ -887,6 +887,7 @@ export default {
       cilDataTransferDown,
     }
     return {
+      token: '',
       searchQuery,
       terminalTypes,
       icons,
@@ -937,7 +938,7 @@ export default {
       return (offset) =>
         typeof this.dynamicData == 'object'
           ? `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}&status=${this.dynamicData.status_value}&format=json&paydate__range=${this.dynamicData.dateStart}T${this.dynamicData.timeStart}%2C${this.dynamicData.dateEnd}T${this.dynamicData.timeEnd}&service_name=${this.dynamicData.servicename}&provider_name=${this.dynamicData.providername}&point_id=${this.searchForm.terminalId}&offset=${offset}`
-          : `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}${this.selectedStatus}&format=json&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}&service_name=${this.searchForm.selectedService}&provider_name=${this.searchForm.selectedProvider}&point_id=${this.searchForm.terminalId}&offset=${offset}`
+          : `http://172.20.10.183:7000/payment/?paymentid=${this.searchForm.paymentId}${this.selectedModel}&account=${this.searchForm.accountPhoneNumber}${this.selectedStatus}&format=json&paydate__range=${this.searchForm.dateStart}T${this.searchForm.timeStart}%2C${this.searchForm.dateEnd}T${this.searchForm.timeEnd}&service_id=${this.searchForm.selectedService}&provider_id=${this.searchForm.selectedProvider}&point_id=${this.searchForm.terminalId}&offset=${offset}`
     },
     //computed dynamic property for sorted search results
     sortedSearchResults() {
@@ -1029,11 +1030,11 @@ export default {
     },
     // void , adds service id to selected service
     selectService: function (service) {
-      this.searchForm.selectedService = service.servicename
-      console.log(service)
+      this.searchForm.selectedService = service.serviceid
+      //console.log(service)
     },
     selectProvider: function (provider) {
-      this.searchForm.selectedProvider = provider
+      this.searchForm.selectedProvider = provider.provider_id
       console.log(this.searchForm.selectedProvider)
     },
     selectAgent: function (agent) {
@@ -1059,7 +1060,7 @@ export default {
       this.searchArticle(this.dynamicSearchQuery(0))
     },
     // void , gets specific search info
-    //payment id 388291856 account num 558557596    GPG10020899
+    //payment id 388291856 1561894410 account num 558557596    GPG10020899   1561892072
     searchArticle: function (query) {
       this.pageLoading = true
       this.page = 1
@@ -1080,7 +1081,7 @@ export default {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
+          //console.log(data)
           this.dbData = data
           this.totalElementCount = data.overall_total
           this.pageLoading = false
@@ -1122,22 +1123,22 @@ export default {
     },
     //test
     submitPayment: function (selectedTableData) {
-      console.log('submit this elements ' + selectedTableData)
+      //console.log('submit this elements ' + selectedTableData)
     },
     //test
     cancelPayment: function (selectedTableData) {
       //fetch(www.ciefjffef/id)
-      console.log('cancel this elements ' + selectedTableData)
+      //console.log('cancel this elements ' + selectedTableData)
     },
     //test
     mailPayment: function (selectedTableData) {
-      console.log('mail this elements ' + selectedTableData)
+      //console.log('mail this elements ' + selectedTableData)
     },
     //test
     doOperation(operationId) {
       switch (operationId) {
         case 1:
-          console.log('add comment this elements ' + this.selectedTableData)
+          //console.log('add comment this elements ' + this.selectedTableData)
           this.isAddCommentModalActive = true
           //this.addComment(this.selectedTableData)
           break
@@ -1179,11 +1180,13 @@ export default {
     console.log(this.dynamicData)
   },
   beforeMount() {
+    console.log(localStorage.getItem('token'))
+
     fetch('http://172.20.10.183:7000/service')
       .then((response) => response.json())
       .then((data) => {
         this.dbServices = data
-        //console.log(this.dbServices)
+        console.log(this.dbServices)
       })
     fetch('http://172.20.10.183:7000/provider')
       .then((response) => response.json())

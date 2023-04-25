@@ -9,32 +9,26 @@
       </CHeaderBrand>
       <CHeaderNav class="d-none d-md-flex me-auto">
         <CNavItem>
-          <CNavLink href="/dashboard"> Dashboard </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="../views/account/login.vue">Users</CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">Settings</CNavLink>
+          <router-link class="nav-link" :to="{ name: 'Dashboard' }"
+            >Dashboard</router-link
+          >
         </CNavItem>
       </CHeaderNav>
       <CHeaderNav>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-bell" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-list" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink href="#">
-            <CIcon class="mx-2" icon="cil-envelope-open" size="lg" />
-          </CNavLink>
-        </CNavItem>
-        <div class="border border-danger p-3"></div>
+        <CDropdown color="secondary" direction="center">
+          <CDropdownToggle color="secondary"
+            ><CIcon :content="cilUser"
+          /></CDropdownToggle>
+          <CDropdownMenu class="transition-0">
+            <CDropdownItem disabled>Profile</CDropdownItem>
+            <CDropdownItem disabled>Settings</CDropdownItem>
+            <CDropdownItem disabled>Events</CDropdownItem>
+            <CDropdownDivider />
+            <CDropdownItem class="cursor-pointer" @click="logOut"
+              >Log out</CDropdownItem
+            >
+          </CDropdownMenu>
+        </CDropdown>
       </CHeaderNav>
     </CContainer>
     <CHeaderDivider />
@@ -45,17 +39,32 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import router from '@/router'
 import AppBreadcrumb from './AppBreadcrumb'
 import { logo } from '@/assets/brand/logo'
+import { cilUser } from '@coreui/icons'
 export default {
   name: 'AppHeader',
   components: {
     AppBreadcrumb,
   },
-  setup() {
+  data() {
     return {
       logo,
+      cilUser,
     }
   },
+  methods: {
+    ...mapActions('auth', {
+      actionLogOut: 'userLogout',
+    }),
+    logOut: async function () {
+      await this.actionLogOut()
+
+      router.push({ name: 'Login' })
+    },
+  },
+  beforeMount() {},
 }
 </script>

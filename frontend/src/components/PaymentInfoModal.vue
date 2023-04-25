@@ -43,10 +43,6 @@
             {{ data.paydate.slice(11, 19) }}
           </li>
           <li class="list-group-item">
-            <span class="text-secondary">Location :</span>
-            {{ data.locationname }}
-          </li>
-          <li class="list-group-item">
             <span class="text-secondary">Status : </span>
             <span
               class="text-center text-light rounded px-2"
@@ -78,10 +74,19 @@
           <div
             class="d-flex justify-content-between py-2 bg-light bg-gradient text-center"
           >
-            <div class="w-50">Name</div>
-            <div class="w-50">Value</div>
+            <div class="w-50 text-dark">Name</div>
+            <div class="w-50 text-dark">Value</div>
+          </div>
+          <div v-if="data.parameters.length == 0">
+            <div
+              style="padding: 3px; border: 1px solid rgb(221, 221, 221)"
+              class="text-center text-secondary"
+            >
+              No Parameters to show...
+            </div>
           </div>
           <div
+            v-else
             class="w-100 d-flex justify-content-between"
             v-for="item in data.parameters"
             :key="item"
@@ -122,15 +127,15 @@ export default {
     },
     bgColorCheck: function (status) {
       switch (status) {
-        case 'Error':
+        case 'error':
           return 'bg-danger'
-        case 'Success':
+        case 'success':
           return 'bg-success'
-        case 'Test':
+        case 'test':
           return 'bg-secondary'
-        case 'Cancelled':
+        case 'processing':
           return 'bg-secondary'
-        case 'Reject':
+        case 'reject':
           return 'bg-danger'
       }
     },

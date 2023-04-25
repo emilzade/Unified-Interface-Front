@@ -13,7 +13,11 @@
                     <CInputGroupText>
                       <CIcon icon="cil-user" />
                     </CInputGroupText>
-                    <CFormInput placeholder="Email" v-model="payload.email" />
+                    <CFormInput
+                      autocomplete="email"
+                      placeholder="Email"
+                      v-model="payload.email"
+                    />
                   </CInputGroup>
                   <CInputGroup class="mb-4">
                     <CInputGroupText>
@@ -23,7 +27,7 @@
                       v-model="payload.password"
                       type="password"
                       placeholder="Password"
-                      autocomplete="off"
+                      autocomplete="password"
                     />
                   </CInputGroup>
                   <CRow>
@@ -44,6 +48,8 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
+import router from '@/router'
 export default {
   name: 'Login',
   data() {
@@ -55,25 +61,47 @@ export default {
       payload,
     }
   },
+  computed: {
+    ...mapGetters('auth', {
+      getLoginApiStatus: 'getLoginApiStatus',
+    }),
+  },
   methods: {
-    login: function () {
-      fetch('http://172.20.10.183:7000/login/', {
-        method: 'Post',
-        body: JSON.stringify({
-          email: this.payload.email,
-          password: this.payload.password,
-        }),
-        headers: {
-          'Content-type': 'application/json',
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data)
-          this.$cookies.set('token', data.token, 14425, '/', '', false, '')
-          //console.log(this.$cookies.get('token'))
-        })
+    ...mapActions('auth', {
+      actionLoginApi: 'loginApi',
+    }),
+    async login() {
+      console.log(this.payload)
+      await this.actionLoginApi(this.payload)
+      console.log(this.getLoginApiStatus)
+
+      if (this.getLoginApiStatus == 'success') {
+        router.push({ name: 'Dashboard' })
+      } else {
+        console.log('failed')
+      }
     },
+    // login: function () {
+    //   fetch('http://172.20.10.183:7000/login/', {
+    //     method: 'Post',
+    //     body: JSON.stringify({
+    //       email: this.payload.email,
+    //       password: this.payload.password,
+    //     }),
+    //     headers: {
+    //       'Content-type': 'application/json',
+    //     },
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       console.log(data)
+    //       //this.$cookies.set('token', data.token, 14425, '/', '', false, '')
+    //       //console.log(this.$cookies.get('token'))
+    //     })
+    //     .catch((data) => {
+    //       throw data
+    //     })
+    // },
   },
   beforeMount() {},
 }

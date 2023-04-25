@@ -112,10 +112,11 @@ export default {
     }
   },
   methods: {
-    aa(value, value2) {
-      console.log(value)
-      console.log(value2)
-    },
+    // aa(value, value2) {
+    //   console.log(value)
+    //   console.log(value2)
+    // },
+    aa() {},
   },
 }
 </script>
