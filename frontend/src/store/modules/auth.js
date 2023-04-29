@@ -10,7 +10,7 @@ const state = () => ({
     phone: '',
   },
   logOut: false,
-  token: '',
+  token: localStorage.getItem('token'),
 })
 
 const getters = {
@@ -22,6 +22,9 @@ const getters = {
   },
   getLogout(state) {
     return state.logOut
+  },
+  getToken(state) {
+    return state.token
   },
 }
 
@@ -44,6 +47,7 @@ const actions = {
           commit('setToken', data.token)
           localStorage.setItem('isAuthenticated', 'true')
           localStorage.setItem('role', 'admin')
+          localStorage.setItem('token', data.token)
         } else {
           commit('setLoginApiStatus', 'failed')
           commit('setToken', '')

@@ -103,6 +103,11 @@ export default {
     //     })
     // },
   },
-  beforeMount() {},
+  beforeMount() {
+    console.log(
+      `Test email : test1@gmail.com
+Test password : Password.1`,
+    )
+  },
 }
 </script>

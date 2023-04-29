@@ -97,6 +97,7 @@
             placeholder="Transaction Id"
             class="w-100 h-100"
             autocomplete="off"
+            disabled
           />
         </CCol>
         <CCol class="col-sm-4 col-6 my-2">
@@ -108,6 +109,7 @@
             placeholder="Terminal Id"
             class="w-100 h-100"
             autocomplete="off"
+            disabled
           />
         </CCol>
         <!--inputs end-->
@@ -140,7 +142,7 @@
             :placeholder="'Select Providers'"
             :disabled="this.dynamicData != ''"
             label="providername"
-            track-by="providername"
+            track-by="provider_id"
             @select="selectProvider"
             @remove="searchForm.selectedProvider = ''"
           />
@@ -157,7 +159,7 @@
             :placeholder="'Select Service'"
             :disabled="this.dynamicData != ''"
             label="servicename"
-            track-by="servicename"
+            track-by="serviceid"
             @select="selectService"
             @remove="searchForm.selectedService = ''"
           />
@@ -189,6 +191,7 @@
             placeholder="Min Payment"
             class="w-100 h-100"
             autocomplete="off"
+            disabled
           />
         </CCol>
         <CCol class="col-sm-2 col-6 my-2">
@@ -199,6 +202,7 @@
             placeholder="Max Payment"
             class="w-100 h-100"
             autocomplete="off"
+            disabled
           />
         </CCol>
         <CCol class="col-sm-2 col-6 my-2">
@@ -668,7 +672,6 @@ export default {
     }
   },
   data() {
-    const searchQuery = ''
     const terminalTypes = [
       {
         id: '1',
@@ -887,8 +890,6 @@ export default {
       cilDataTransferDown,
     }
     return {
-      token: '',
-      searchQuery,
       terminalTypes,
       icons,
       //initial objects
@@ -1003,6 +1004,9 @@ export default {
         ? this.dbProviders.filter((x) => x.type == 'Modenis_Provider')
         : this.dbProviders
     },
+    token() {
+      return this.$store.state.auth.token
+    },
     isSelectedTableDataEmpty: ({ selectedTableData }) =>
       selectedTableData.length === 0,
   },
@@ -1076,14 +1080,25 @@ export default {
         method: 'Get',
         headers: {
           'Content-type': 'application/json;charset=UTF-8',
-          Authorization: 'Token 684a106219727b548d5a077eedccd5ab4743c50f',
+          Authorization: `Token ${this.token}`,
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.ok) {
+            return response.json()
+          }
+          return Promise.reject(response)
+        })
         .then((data) => {
           //console.log(data)
           this.dbData = data
           this.totalElementCount = data.overall_total
+          this.pageLoading = false
+        })
+        .catch((data) => {
+          if (data.status == 401) {
+            alert('Unauthorized')
+          }
           this.pageLoading = false
         })
     },
@@ -1180,8 +1195,7 @@ export default {
     console.log(this.dynamicData)
   },
   beforeMount() {
-    console.log(localStorage.getItem('token'))
-
+    console.log(this.$store)
     fetch('http://172.20.10.183:7000/service')
       .then((response) => response.json())
       .then((data) => {
@@ -1192,7 +1206,7 @@ export default {
       .then((response) => response.json())
       .then((data) => {
         this.dbProviders = data
-        //console.log(this.dbProviders)
+        console.log(this.dbProviders)
       })
     fetch('http://172.20.10.183:7000/agent')
       .then((response) => response.json())

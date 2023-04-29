@@ -183,7 +183,7 @@
     </CTableHead>
     <CTableBody>
       <CTableRow align="middle" v-for="item in sortedSearchResults" :key="item">
-        <CTableDataCell> 1 </CTableDataCell>
+        <CTableDataCell> o </CTableDataCell>
         <CTableDataCell>
           <span style="width: 100px; display: block; overflow: hidden">
             {{ item.servicename }}
@@ -461,6 +461,9 @@ export default {
         ? this.dbProviders.filter((x) => x.type == 'Modenis_Provider')
         : this.dbProviders
     },
+    token() {
+      return this.$store.state.auth.token
+    },
   },
   methods: {
     search: function () {
@@ -469,21 +472,37 @@ export default {
     searchArticle: function (query) {
       this.pageLoading = true
       this.page = 1
-      //console.log(query)
+      console.log(query)
       fetch(query, {
         method: 'Get',
         headers: {
           'Content-type': 'application/json;charset=UTF-8',
-          Authorization: 'Token 684a106219727b548d5a077eedccd5ab4743c50f',
+          Authorization: `Token ${this.token}`,
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.ok) {
+            return response.json()
+          }
+          return Promise.reject(response)
+        })
         .then((data) => {
-          //console.log(data)
+          console.log(data)
           this.dbData = data
           this.totalElementCount = data.overall_total
           this.pageLoading = false
         })
+        .catch((data) => {
+          if (data.status == 401) {
+            alert('Unauthorized')
+          }
+          this.pageLoading = false
+        })
+    },
+    pageSelected: function (pageId) {
+      var offset = (pageId - 1) * this.itemsPerPage
+      this.searchArticle(this.dynamicSearchQuery(offset))
+      this.page = pageId
     },
     PassQueryToPaymentSearch: function (item) {
       item = {
@@ -518,11 +537,6 @@ export default {
     selectTerminalType: function () {
       this.selectedProvider = ref()
       this.selectedService = ref()
-    },
-    pageSelected: function (pageId) {
-      var offset = (pageId - 1) * this.itemsPerPage
-      this.searchArticle(this.dynamicSearchQuery(offset))
-      this.page = pageId
     },
     //datetime returns previous day
     getPreviousDay: function (date = new Date()) {

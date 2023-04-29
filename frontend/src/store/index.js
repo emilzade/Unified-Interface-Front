@@ -22,6 +22,14 @@ export default createStore({
       //console.log(state, data)
     },
   },
+  getters: {
+    fetchExceptionHandler(data) {
+      if (data == 401) {
+        alert('Unauthorized')
+      }
+      console.log(data)
+    },
+  },
   actions: {},
   modules: { auth: authModule },
 })
