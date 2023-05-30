@@ -44,6 +44,9 @@ $sizes: (
 .fade-leave-active {
   transition: all 0.2s;
 }
+a {
+  text-decoration: none;
+}
 @media (max-width: 768px) {
   .basic-buttons-inactive {
     position: absolute;

@@ -1,6 +1,14 @@
 import { defineComponent, h, onMounted, ref, resolveComponent } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+//import VueCookies from 'vue-cookies'
 
+//const token = VueCookies.get('token')
+var user = localStorage.getItem('user')
+if (user != null) {
+  if (user.length > 0) {
+    user = JSON.parse(user)
+  }
+}
 import {
   CBadge,
   CSidebarNav,
@@ -78,54 +86,68 @@ const AppSidebarNav = defineComponent({
           },
         )
       }
-
-      return item.to
-        ? h(
-            RouterLink,
-            {
-              to: item.to,
-              custom: true,
-            },
-            {
-              default: (props) =>
-                h(
-                  resolveComponent(item.component),
-                  {
-                    active: props.isActive,
-                    href: props.href,
-                    onClick: () => props.navigate(),
-                  },
-                  {
-                    default: () => [
-                      item.icon &&
-                        h(resolveComponent('CIcon'), {
-                          customClassName: 'nav-icon',
-                          name: item.icon,
-                        }),
-                      item.name,
-                      item.badge &&
-                        h(
-                          CBadge,
-                          {
-                            class: 'ms-auto',
-                            color: item.badge.color,
-                          },
-                          {
-                            default: () => item.badge.text,
-                          },
-                        ),
-                    ],
-                  },
-                ),
-            },
-          )
-        : h(
-            resolveComponent(item.component),
-            {},
-            {
-              default: () => item.name,
-            },
-          )
+      if (
+        (user.is_active &&
+          item.meta.authRequired &&
+          !item.meta.staffRequired &&
+          !item.meta.adminRequired) ||
+        (user.is_staff &&
+          item.meta.authRequired &&
+          item.meta.staffRequired &&
+          !item.meta.adminRequired) ||
+        (user.is_superuser &&
+          item.meta.authRequired &&
+          item.meta.staffRequired &&
+          item.meta.adminRequired)
+      ) {
+        return item.to
+          ? h(
+              RouterLink,
+              {
+                to: item.to,
+                custom: true,
+              },
+              {
+                default: (props) =>
+                  h(
+                    resolveComponent(item.component),
+                    {
+                      active: props.isActive,
+                      href: props.href,
+                      onClick: () => props.navigate(),
+                    },
+                    {
+                      default: () => [
+                        item.icon &&
+                          h(resolveComponent('CIcon'), {
+                            customClassName: 'nav-icon',
+                            name: item.icon,
+                          }),
+                        item.name,
+                        item.badge &&
+                          h(
+                            CBadge,
+                            {
+                              class: 'ms-auto',
+                              color: item.badge.color,
+                            },
+                            {
+                              default: () => item.badge.text,
+                            },
+                          ),
+                      ],
+                    },
+                  ),
+              },
+            )
+          : h(
+              resolveComponent(item.component),
+              {},
+              {
+                default: () => item.name,
+              },
+            )
+      }
     }
 
     return () =>

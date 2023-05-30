@@ -105,11 +105,13 @@
     @changeManageUserModalState="changeManageUserModalState"
     :data="selectedUser"
   ></ManageUserModal>
+  <div class="btn btn-success" @click="saveFile">Save</div>
 </template>
 <script>
 import { ref } from 'vue'
 import { cilPencil, cilX, cibCircle, cilCheck } from '@coreui/icons'
 import ManageUserModal from '@/components/ManageUserModal.vue'
+import { fs } from 'fs'
 export default {
   name: 'User',
   components: { ManageUserModal },
@@ -183,15 +185,17 @@ export default {
     const selectedUser = ref(null)
     const icons = { cilPencil, cilX, cibCircle, cilCheck }
     const isManageUserModalActive = false
+    const test = {
+      name: 'Salam',
+      surname: 'sagol',
+    }
     return {
       userData,
       thData,
-
       selectedUser,
-
       isManageUserModalActive,
-
       icons,
+      test,
     }
   },
   methods: {
@@ -208,6 +212,14 @@ export default {
         this.isManageUserModalActive = true
       } else {
         this.isManageUserModalActive = false
+      }
+    },
+    saveFile: function () {
+      const data = JSON.stringify(this.test)
+      try {
+        fs.writeFileSync('myFile.txt', data, 'utf-8')
+      } catch (e) {
+        alert('Failed to save the file', e)
       }
     },
   },

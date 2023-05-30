@@ -64,6 +64,7 @@ export default {
   computed: {
     ...mapGetters('auth', {
       getLoginApiStatus: 'getLoginApiStatus',
+      getToken: 'getToken',
     }),
   },
   methods: {
@@ -105,9 +106,17 @@ export default {
   },
   beforeMount() {
     console.log(
-      `Test email : test1@gmail.com
-Test password : Password.1`,
+      `User test email : test1@gmail.com
+User test password : Password.1
+
+Staff test email : test2@gmail.com
+Staff test password : Password.2
+
+Admin test email : test3@gmail.com
+Admin test password : Password.3
+`,
     )
   },
 }
+//change user from localstorage to user.json
 </script>

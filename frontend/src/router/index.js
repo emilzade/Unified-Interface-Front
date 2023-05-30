@@ -1,6 +1,7 @@
 import { h, resolveComponent } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+import VueCookies from 'vue-cookies'
 import DefaultLayout from '@/layouts/DefaultLayout'
 import Page404 from '@/views/pages/Page404'
 const routes = [
@@ -10,8 +11,9 @@ const routes = [
     component: DefaultLayout,
     redirect: '/dashboard',
     meta: {
-      authRequired: 'true',
-      adminRequired: 'true',
+      authRequired: true,
+      staffRequired: false,
+      adminRequired: false,
     },
     children: [
       {
@@ -23,8 +25,9 @@ const routes = [
         component: () =>
           import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
         meta: {
-          authRequired: 'true',
-          adminRequired: 'true',
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
         },
       },
       {
@@ -35,8 +38,9 @@ const routes = [
             return h(resolveComponent('router-view'))
           },
           meta: {
-            authRequired: 'true',
-            adminRequired: 'true',
+            authRequired: true,
+            staffRequired: false,
+            adminRequired: false,
           },
         },
         children: [
@@ -45,8 +49,9 @@ const routes = [
             name: 'PaymentSearch',
             component: () => import('@/views/payments/PaymentSearch.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: false,
+              adminRequired: false,
             },
           },
           {
@@ -54,8 +59,9 @@ const routes = [
             name: 'ServiceCheck',
             component: () => import('@/views/payments/ServiceCheck.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: true,
+              adminRequired: false,
             },
           },
           {
@@ -63,8 +69,9 @@ const routes = [
             name: 'Log',
             component: () => import('@/views/base/Log.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: true,
+              adminRequired: true,
             },
           },
         ],
@@ -77,8 +84,9 @@ const routes = [
             return h(resolveComponent('router-view'))
           },
           meta: {
-            authRequired: 'true',
-            adminRequired: 'true',
+            authRequired: true,
+            staffRequired: false,
+            adminRequired: false,
           },
         },
         children: [
@@ -87,8 +95,9 @@ const routes = [
             name: 'Kontakts',
             component: () => import('@/views/base/Kontakts.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: false,
+              adminRequired: false,
             },
           },
           {
@@ -96,8 +105,9 @@ const routes = [
             name: 'Log',
             component: () => import('@/views/base/Log.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: false,
+              adminRequired: false,
             },
           },
         ],
@@ -110,8 +120,9 @@ const routes = [
             return h(resolveComponent('router-view'))
           },
           meta: {
-            authRequired: 'true',
-            adminRequired: 'true',
+            authRequired: true,
+            staffRequired: false,
+            adminRequired: false,
           },
         },
         children: [
@@ -120,8 +131,9 @@ const routes = [
             path: '/management/user',
             component: () => import('@/views/management/User.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: false,
+              adminRequired: false,
             },
           },
           {
@@ -129,8 +141,9 @@ const routes = [
             path: '/management/role',
             component: () => import('@/views/management/Role.vue'),
             meta: {
-              authRequired: 'true',
-              adminRequired: 'true',
+              authRequired: true,
+              staffRequired: false,
+              adminRequired: false,
             },
           },
         ],
@@ -146,8 +159,9 @@ const routes = [
         return h(resolveComponent('router-view'))
       },
       meta: {
-        authRequired: 'true',
-        adminRequired: 'true',
+        authRequired: true,
+        staffRequired: false,
+        adminRequired: false,
       },
     },
     children: [
@@ -156,8 +170,9 @@ const routes = [
         name: 'Page404',
         component: () => import('@/views/pages/Page404'),
         meta: {
-          authRequired: 'true',
-          adminRequired: 'true',
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
         },
       },
 
@@ -166,8 +181,9 @@ const routes = [
         name: 'Page500',
         component: () => import('@/views/pages/Page500'),
         meta: {
-          authRequired: 'true',
-          adminRequired: 'true',
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
         },
       },
       {
@@ -175,8 +191,9 @@ const routes = [
         name: 'Login',
         component: () => import('@/views/pages/Login'),
         meta: {
-          authRequired: 'false',
-          adminRequired: 'false',
+          authRequired: false,
+          staffRequired: false,
+          adminRequired: false,
         },
       },
       {
@@ -184,8 +201,9 @@ const routes = [
         name: 'Register',
         component: () => import('@/views/pages/Register'),
         meta: {
-          authRequired: 'false',
-          adminRequired: 'false',
+          authRequired: false,
+          staffRequired: false,
+          adminRequired: false,
         },
       },
     ],
@@ -195,8 +213,9 @@ const routes = [
     name: 'Page404',
     component: Page404,
     meta: {
-      authRequired: 'false',
-      adminRequired: 'false',
+      authRequired: false,
+      staffRequired: false,
+      adminRequired: false,
     },
   },
   {
@@ -219,22 +238,44 @@ router.beforeEach((to, from, next) => {
   console.log('authRequired', to.meta.authRequired)
   console.log('adminRequired', to.meta.adminRequired)
 
-  if (to.meta.authRequired === 'true') {
-    const role = localStorage.getItem('role')
-    if (role == 'user' || role == 'admin') {
-      if (to.meta.adminRequired === 'true') {
-        if (role == 'admin') {
-          return next()
+  //const isAuthenticated = localStorage.getItem('isAuthenticated')
+  const token = VueCookies.get('token')
+  var user = localStorage.getItem('user')
+
+  var role = ''
+  if (user != null) {
+    if (user.length > 0) {
+      user = JSON.parse(user)
+    }
+  }
+
+  if (to.meta.authRequired == true) {
+    if (user.is_active && token != null) {
+      if (to.meta.staffRequired == true) {
+        if (user.is_staff && token != null) {
+          if (to.meta.adminRequired == true) {
+            if (role == 'admin' && token != null) {
+              return next()
+            } else {
+              console.log('Only admins')
+              router.push({
+                name: 'Index',
+              })
+            }
+          } else {
+            return next()
+          }
         } else {
-          alert('Sorry , you need an admin permission for that...')
+          console.log('Only Staff')
           router.push({
-            name: 'Index',
+            name: 'Dashboard',
           })
         }
       } else {
         return next()
       }
     } else {
+      console.log('Only Users')
       router.push({
         name: 'Login',
       })

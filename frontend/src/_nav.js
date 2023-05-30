@@ -8,47 +8,52 @@ export default [
       color: 'primary',
       text: 'NEW',
     }, */
+    meta: {
+      authRequired: true,
+      staffRequired: false,
+      adminRequired: false,
+    },
   },
-  /* {
-    component: 'CNavTitle',
-    name: 'Theme',
-  },
-  {
-    component: 'CNavItem',
-    name: 'Colors',
-    to: '/theme/colors',
-    icon: 'cil-drop',
-  },
-  {
-    component: 'CNavItem',
-    name: 'Typography',
-    to: '/theme/typography',
-    icon: 'cil-pencil',
-  },
-  {
-    component: 'CNavTitle',
-    name: 'Components',
-  }, */
   {
     component: 'CNavGroup',
     name: 'Ödənişlər',
     to: '/payments',
     icon: 'cil-puzzle',
+    meta: {
+      authRequired: true,
+      staffRequired: false,
+      adminRequired: false,
+    },
     items: [
       {
         component: 'CNavItem',
         name: 'Ödəniş axtarışı',
         to: '/payments/payment-search',
+        meta: {
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
+        },
       },
       {
         component: 'CNavItem',
         name: 'Service Check',
         to: '/payments/service-check',
+        meta: {
+          authRequired: true,
+          staffRequired: true,
+          adminRequired: false,
+        },
       },
       {
         component: 'CNavItem',
         name: 'Log',
         to: '/base/log',
+        meta: {
+          authRequired: true,
+          staffRequired: true,
+          adminRequired: true,
+        },
       },
     ],
   },
@@ -57,16 +62,31 @@ export default [
     name: 'Base',
     to: '/base',
     icon: 'cil-puzzle',
+    meta: {
+      authRequired: true,
+      staffRequired: false,
+      adminRequired: false,
+    },
     items: [
       {
         component: 'CNavItem',
         name: 'Kontakts',
         to: '/base/kontakts',
+        meta: {
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
+        },
       },
       {
         component: 'CNavItem',
         name: 'Log',
         to: '/base/log',
+        meta: {
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
+        },
       },
     ],
   },
@@ -75,44 +95,31 @@ export default [
     name: 'Management',
     icon: 'cil-settings',
     to: '/management',
+    meta: {
+      authRequired: true,
+      staffRequired: false,
+      adminRequired: false,
+    },
     items: [
       {
         component: 'CNavItem',
         name: 'User',
         to: '/management/user',
+        meta: {
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
+        },
       },
       {
         component: 'CNavItem',
         name: 'Role',
         to: '/management/role',
-      },
-    ],
-  },
-  {
-    component: 'CNavGroup',
-    name: 'Pages',
-    to: '/pages',
-    icon: 'cil-star',
-    items: [
-      {
-        component: 'CNavItem',
-        name: 'Login',
-        to: '/pages/login',
-      },
-      {
-        component: 'CNavItem',
-        name: 'Register',
-        to: '/pages/register',
-      },
-      {
-        component: 'CNavItem',
-        name: 'Error 404',
-        to: '/pages/404',
-      },
-      {
-        component: 'CNavItem',
-        name: 'Error 500',
-        to: '/pages/500',
+        meta: {
+          authRequired: true,
+          staffRequired: false,
+          adminRequired: false,
+        },
       },
     ],
   },

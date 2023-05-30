@@ -120,7 +120,7 @@
             :options="dbAgents"
             :limit="1"
             :multiple="false"
-            :close-on-select="false"
+            :close-on-select="true"
             :clear-on-select="false"
             :preserve-search="true"
             :placeholder="'Select Agent'"
@@ -171,7 +171,7 @@
             :limit="1"
             :multiple="true"
             :disabled="isTerminalIdSelected"
-            :close-on-select="false"
+            :close-on-select="true"
             :clear-on-select="false"
             :preserve-search="true"
             :showNoResults="true"
@@ -565,13 +565,13 @@
 
   <!--alert start-->
   <CAlert
-    v-if="isAlertActive"
-    @dismiss="isAlertActive = !isAlertActive"
+    v-if="alertObject.isActive"
+    @close="alertObject.isActive = !alertObject.isActive"
     color="danger"
     dismissible
     class="alert-custom"
   >
-    <strong>Please</strong> enter correct input !
+    {{ alertObject.message }}
   </CAlert>
   <!--alert end-->
 
@@ -831,7 +831,10 @@ export default {
     const isInfoModalActive = ref(false)
     const isShowCommentModalActive = ref(false)
     const isAddCommentModalActive = ref(false)
-    const isAlertActive = ref(false)
+    const alertObject = {
+      isActive: false,
+      message: '',
+    }
     //database things
     const thData = [
       { id: 1, title: '', sortBy: null },
@@ -897,6 +900,7 @@ export default {
       operations,
       successTypes,
       retailNetworks,
+      alertObject,
       //selected objects
       selectedOperation,
       selectedRetailNetwork,
@@ -917,7 +921,6 @@ export default {
       isInfoModalActive,
       isShowCommentModalActive,
       isAddCommentModalActive,
-      isAlertActive,
       //db things
       searchForm,
 
@@ -1097,7 +1100,9 @@ export default {
         })
         .catch((data) => {
           if (data.status == 401) {
-            alert('Unauthorized')
+            this.alertObject.isActive = true
+            this.alertObject.message =
+              'You are unauthorized. Please log in again...'
           }
           this.pageLoading = false
         })
@@ -1195,7 +1200,6 @@ export default {
     console.log(this.dynamicData)
   },
   beforeMount() {
-    console.log(this.$store)
     fetch('http://172.20.10.183:7000/service')
       .then((response) => response.json())
       .then((data) => {

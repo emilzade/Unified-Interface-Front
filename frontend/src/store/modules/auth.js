@@ -1,16 +1,14 @@
 //import axios from 'axios'
 //import jwtInterceptor from '../../shared/jwt.interceptor'
+
+import VueCookies from 'vue-cookies'
+
 const state = () => ({
   loginApiStatus: '',
-  userProfile: {
-    id: 0,
-    lastName: '',
-    firstName: '',
-    email: '',
-    phone: '',
-  },
+  userProfile: localStorage.getItem('user'),
+  token: VueCookies.get('token'),
+  isAuthenticated: false,
   logOut: false,
-  token: localStorage.getItem('token'),
 })
 
 const getters = {
@@ -40,50 +38,70 @@ const actions = {
     }
     await fetch('http://172.20.10.183:7000/login/', configObject)
       .then((response) => response.json())
-      .then((data) => {
-        console.log(data)
-        if (data.token.length > 0) {
+      .then(async (loginData) => {
+        console.log(loginData)
+        if (loginData.status == 200) {
           commit('setLoginApiStatus', 'success')
-          commit('setToken', data.token)
-          localStorage.setItem('isAuthenticated', 'true')
           localStorage.setItem('role', 'admin')
-          localStorage.setItem('token', data.token)
+          localStorage.setItem('isAuthenticated', true)
+          commit('setIsAuthenticated', true)
+
+          var slicedDate =
+            loginData.expires_at.slice(0, 10) +
+            ' ' +
+            loginData.expires_at.slice(11, 19)
+
+          var parsedDate = new Date(slicedDate)
+          var addedDate = parsedDate.setTime(
+            parsedDate.getTime() + 4 * 60 * 60 * 1000,
+          )
+          var ceiledDate = Math.ceil((addedDate - new Date()) / 1000)
+          console.log(ceiledDate)
+
+          VueCookies.set('token', loginData.token, `${ceiledDate}s`)
+          commit('setToken', loginData.token)
+
+          await fetch(`http://172.20.10.183:7000/profile?email=${data.email}`, {
+            method: 'Get',
+            headers: {
+              'Content-type': 'application/json;charset=UTF-8',
+              Authorization: `Token ${loginData.token}`,
+            },
+          })
+            .then(async (response) => await response.json())
+            .then((userData) => {
+              console.log(userData)
+              localStorage.setItem('user', JSON.stringify(userData.results[0]))
+              commit('setUserProfile', JSON.stringify(userData.results[0]))
+            })
         } else {
           commit('setLoginApiStatus', 'failed')
-          commit('setToken', '')
-          localStorage.setItem('isAuthenticated', 'false')
           localStorage.setItem('role', '')
-          localStorage.setItem('token', '')
+          localStorage.setItem('isAuthenticated', false)
+          commit('setIsAuthenticated', false)
+          VueCookies.set('token', '', '')
         }
       })
   },
 
-  async userProfile({ commit }) {
-    // const response = await jwtInterceptor
-    //   .get('http://localhost:3000/user-profile', {
-    //     withCredentials: true,
-    //     credentials: 'include',
-    //   })
-    //   .catch((err) => {
-    //     console.log(err)
-    //   })
+  async userLogout({ commit, state }) {
+    console.log(state.token)
+    fetch('http://172.20.10.183:7000/logout', {
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json;charset=UTF-8',
+        Authorization: `Token ${state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data))
 
-    // if (response && response.data) {
-    //   commit('setUserProfile', response.data)
-    // }
-    const customUser = {
-      id: 1,
-      lastName: 'Testov',
-      firstName: 'Test',
-      email: 'test@mail.ru',
-      phone: '100',
-    }
-    commit('setUserProfile', customUser)
-  },
-  async userLogout({ commit }) {
     commit('setLogout', true)
     localStorage.setItem('isAuthenticated', 'false')
     localStorage.setItem('role', '')
+    VueCookies.set('token', '')
+    commit('setToken', '')
+    localStorage.setItem('user', '')
   },
 }
 
@@ -91,18 +109,14 @@ const mutations = {
   setLoginApiStatus(state, data) {
     state.loginApiStatus = data
   },
+  setIsAuthenticated(state, data) {
+    state.isAuthenticated = data
+  },
   setToken(state, data) {
     state.token = data
   },
   setUserProfile(state, data) {
-    const userProfile = {
-      id: data.id,
-      lastName: data.lastName,
-      firstName: data.firstName,
-      email: data.email,
-      phone: data.phone,
-    }
-    state.userProfile = userProfile
+    state.userProfile = data
   },
 
   setLogout(state, payload) {

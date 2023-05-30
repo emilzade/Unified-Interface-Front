@@ -34,7 +34,7 @@
           :options="providers"
           :limit="1"
           :multiple="false"
-          :close-on-select="false"
+          :close-on-select="true"
           :clear-on-select="false"
           :preserve-search="true"
           label="providername"
@@ -50,7 +50,7 @@
           :options="services"
           :limit="1"
           :multiple="false"
-          :close-on-select="false"
+          :close-on-select="true"
           :clear-on-select="false"
           :preserve-search="true"
           :placeholder="'Select Service'"
@@ -186,12 +186,12 @@
         <CTableDataCell> o </CTableDataCell>
         <CTableDataCell>
           <span style="width: 100px; display: block; overflow: hidden">
-            {{ item.servicename }}
+            {{ item.providername }}
           </span>
         </CTableDataCell>
         <CTableDataCell>
           <span style="width: 100px; display: block; overflow: hidden">
-            {{ item.providername }}
+            {{ item.servicename }}
           </span>
         </CTableDataCell>
         <CTableDataCell>
@@ -201,6 +201,11 @@
             style="width: 100px; display: block; overflow: hidden"
           >
             {{ item.status_value }}
+          </span>
+        </CTableDataCell>
+        <CTableDataCell>
+          <span style="width: 100px; display: block; overflow: hidden">
+            {{ item.locationname }}
           </span>
         </CTableDataCell>
         <CTableDataCell>
@@ -235,6 +240,22 @@
     </CTableBody>
   </CTable>
   <!--data table end-->
+
+  <!--alert start-->
+  <CAlert
+    v-if="alertObject.isActive"
+    @close="
+      () => {
+        alertObject.isActive = false
+      }
+    "
+    color="danger"
+    dismissible
+    class="alert-custom"
+  >
+    {{ alertObject.message }}
+  </CAlert>
+  <!--alert end-->
 
   <!--pagination start-->
   <div
@@ -345,12 +366,13 @@ export default {
     const dbData = { results: [] }
     const thData = [
       { id: 1, title: '', sortBy: null },
-      { id: 2, title: 'Service', sortBy: 'servicename' },
-      { id: 3, title: 'Provider', sortBy: 'providername' },
+      { id: 2, title: 'Provider', sortBy: 'providername' },
+      { id: 3, title: 'Service', sortBy: 'servicename' },
       { id: 4, title: 'Status', sortBy: 'status_value' },
-      { id: 5, title: 'Payment Count', sortBy: 'payment_count' },
-      { id: 6, title: 'Terminal', sortBy: 'type' },
-      { id: 7, title: 'Operations', sortBy: 'operations' },
+      { id: 5, title: 'Location', sortBy: 'locationname' },
+      { id: 6, title: 'Payment Count', sortBy: 'payment_count' },
+      { id: 7, title: 'Terminal', sortBy: 'type' },
+      { id: 8, title: 'Operations', sortBy: 'operations' },
     ]
 
     const dbServices = []
@@ -364,7 +386,14 @@ export default {
 
     const selectedService = ref()
     const selectedProvider = ref()
+
+    const alertObject = {
+      isActive: false,
+      message: '',
+    }
+
     return {
+      alertObject,
       cilExternalLink,
       searchForm,
       terminalTypes,
@@ -494,7 +523,9 @@ export default {
         })
         .catch((data) => {
           if (data.status == 401) {
-            alert('Unauthorized')
+            this.alertObject.isActive = true
+            this.alertObject.message =
+              'You are unauthorized. Please log in again...'
           }
           this.pageLoading = false
         })
