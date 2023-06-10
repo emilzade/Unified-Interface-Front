@@ -31,7 +31,7 @@
     "@coreui/vue-chartjs": "2.0.0",
     "axios": "^1.3.6",
     "core-js": "^3.19.0",
-    "fs": "^0.0.1-security",
+    "fs": "^0.0.2",
     "jw-vue-pagination": "^1.0.3",
     "mdbootstrap": "^4.20.0",
     "v-pagination-3": "^0.1.7",
